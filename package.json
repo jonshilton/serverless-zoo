@@ -1,0 +1,94 @@
+{
+  "name": "serverless-zoo",
+  "version": "1.0.0",
+  "description": "A simple RESTful API and GraphQL API to demonstrate how to use the Serverless framework using AWS Lambda, DynamoDb and GraphQL",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jonshilton/sls-zoo.git"
+  },
+  "author": "J. Shilton <jon@opmira.co.uk>",
+  "license": "UNLICENSED",
+  "scripts": {
+    "postinstall": "serverless dynamodb install",
+    "test:unit": "NODE_ENV=test jest --coverage '.+\\.test\\.js$'",
+    "test:int": "env-cmd ./config/env.local serverless offline start --exec \"NODE_ENV=test jest 'tests/.+\\.int.test\\.js$'\"",
+    "test": "npm run test:unit && npm run test:int",
+    "test:watch": "npm run test:unit -- --watch",
+    "stop-dynamo": "kill `ps -ax | grep Dynamo | grep -v grep | awk '{print $1}'`",
+    "prestart": "cd seed-data && node generate.js && npm run stop-dynamo",
+    "start": "env-cmd ./config/env.local serverless offline start",
+    "deploy:shadow": "env-cmd ./config/env.shadow serverless --stage=shadow deploy",
+    "deploy:prod": "env-cmd ./config/env.prod serverless --stage=production deploy",
+    "lint": "eslint --fix ."
+  },
+  "dependencies": {
+    "apollo-server-lambda": "^2.4.6",
+    "babel-polyfill": "^6.26.0",
+    "graphql": "^14.1.1",
+    "serverless-dynamodb-client": "~0.0.2",
+    "uuid": "~3.3.2"
+  },
+  "devDependencies": {
+    "apollo-boost": "^0.1.28",
+    "aws-sdk": "~2.192.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
+    "body-parser": "^1.15.2",
+    "cors": "2.8.4",
+    "env-cmd": "~5.0.0",
+    "eslint": "~5.14.0",
+    "eslint-config-airbnb-base": "~13.1.0",
+    "eslint-config-prettier": "~4.0.0",
+    "eslint-plugin-import": "~2.16.0",
+    "eslint-plugin-prettier": "~3.0.1",
+    "faker": "~4.1.0",
+    "graphql-tag": "^2.10.1",
+    "imports-loader": "^0.8.0",
+    "jest": "~21.2.1",
+    "jsonfile": "~4.0.0",
+    "node-fetch": "^2.3.0",
+    "prettier": "~1.16.4",
+    "serverless-dynamodb-local": "0.2.25",
+    "serverless-offline": "3.33.0",
+    "serverless-webpack": "^4.1.0",
+    "supertest": "~3.4.2",
+    "webpack": "^3.8.1",
+    "webpack-node-externals": "^1.6.0"
+  },
+  "prettier": {
+    "singleQuote": true
+  },
+  "eslintConfig": {
+    "extends": [
+      "airbnb-base",
+      "prettier"
+    ],
+    "plugins": [
+      "prettier"
+    ],
+    "rules": {
+      "prettier/prettier": [
+        "error"
+      ]
+    },
+    "env": {
+      "jest": true
+    }
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "!**/node_modules/**",
+      "!**/seed-data/**"
+    ],
+    "coverageThreshold": {
+      "src/": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": -10
+      }
+    }
+  }
+}

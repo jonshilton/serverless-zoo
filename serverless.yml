@@ -1,0 +1,125 @@
+service: serverless-zoo
+
+frameworkVersion: '>=1.21.0 <2.0.0'
+
+provider:
+  name: aws
+  runtime: nodejs8.11
+  stage: dev
+  region: eu-west-1
+
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    port: 4000
+  webpackIncludeModules: true
+  dynamodb:
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+      seed: true
+    seed:
+      test:
+        sources:
+          - table: Animals
+            sources: [seed-data/Animals.json]
+
+functions:
+  create:
+    handler: restHandler.create
+    role: ServiceRole
+    events:
+      - http:
+          path: /
+          method: post
+          cors: true
+  read:
+    handler: restHandler.read
+    role: ServiceRole
+    events:
+      - http:
+          path: /{id}
+          method: get
+          cors: true
+      - http:
+          path: /
+          method: get
+          cors: true
+  update:
+    handler: restHandler.update
+    role: ServiceRole
+    events:
+      - http:
+          path: /{id}
+          method: put
+          cors: true
+  delete:
+    handler: restHandler.delete
+    role: ServiceRole
+    events:
+      - http:
+          path: /{id}
+          method: delete
+          cors: true
+  graphql:
+    handler: graphqlHandler.graphql
+    role: ServiceRole
+    events:
+      - http:
+          path: graphql
+          method: post
+          cors: true
+      - http:
+          path: graphql
+          method: get
+
+resources:
+  Resources:
+    AnimalTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+        TableName: 'Animals'
+    ServiceRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        RoleName: 'DynamoRole'
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: 'Allow'
+              Principal:
+                Service:
+                  - 'lambda.amazonaws.com'
+              Action:
+                - 'sts:AssumeRole'
+        Policies:
+          - PolicyName: 'Dynamo-ServiceRole-Policy'
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: 'Allow'
+                  Action:
+                    - 'dynamodb:Query'
+                    - 'dynamodb:BatchWriteItem'
+                    - 'dynamodb:GetItem'
+                    - 'dynamodb:DeleteItem'
+                    - 'dynamodb:PutItem'
+                    - 'dynamodb:Scan'
+                    - 'dynamodb:UpdateItem'
+                  Resource:
+                    - 'arn:aws:dynamodb:eu-west-1:*:table/Animals'
+                    - 'arn:aws:dynamodb:eu-west-1:*:table/Animals/*'
