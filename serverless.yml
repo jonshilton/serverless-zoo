@@ -4,9 +4,11 @@ frameworkVersion: '>=1.21.0 <2.0.0'
 
 provider:
   name: aws
-  runtime: nodejs8.11
+  runtime: nodejs8.10
   stage: dev
   region: eu-west-1
+  deploymentBucket:
+    name: ${env:DEPLOYMENT_BUCKET} # Specify where deployment artifacts should be uploaded.
 
 plugins:
   - serverless-webpack
@@ -29,17 +31,28 @@ custom:
           - table: Animals
             sources: [seed-data/Animals.json]
 
+package:
+  exclude:
+    - .git/**
+  individually: true
+
 functions:
   create:
     handler: restHandler.create
+    description: Create a new animal
+    memorySize: 512 # Memory size in MB
+    timeout: 10 # Timeout in seconds
     role: ServiceRole
     events:
-      - http:
+      - http: # This creates an API Gateway HTTP endpoint which can be used to trigger this function
           path: /
           method: post
-          cors: true
+          cors: true # Turns on CORS for this endpoint
   read:
     handler: restHandler.read
+    description: Read an animal by ID
+    memorySize: 512
+    timeout: 10
     role: ServiceRole
     events:
       - http:
@@ -52,6 +65,9 @@ functions:
           cors: true
   update:
     handler: restHandler.update
+    description: Update an animal by ID
+    memorySize: 512
+    timeout: 10
     role: ServiceRole
     events:
       - http:
@@ -60,6 +76,9 @@ functions:
           cors: true
   delete:
     handler: restHandler.delete
+    description: Delete an animal by ID
+    memorySize: 512
+    timeout: 10
     role: ServiceRole
     events:
       - http:
@@ -68,6 +87,7 @@ functions:
           cors: true
   graphql:
     handler: graphqlHandler.graphql
+    description: Handle GraphQL queries and mutations
     role: ServiceRole
     events:
       - http:
@@ -78,9 +98,10 @@ functions:
           path: graphql
           method: get
 
+# AWS resources can be defined here using AWS CloudFormation notation
 resources:
   Resources:
-    AnimalTable:
+    AnimalTable: # Define an Animals DynamoDb Table
       Type: 'AWS::DynamoDB::Table'
       Properties:
         KeySchema:
@@ -93,7 +114,7 @@ resources:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
         TableName: 'Animals'
-    ServiceRole:
+    ServiceRole: # Define an IAM Role that will have permission to assume lambda role and perform dyanmoDb operations
       Type: 'AWS::IAM::Role'
       Properties:
         RoleName: 'DynamoRole'

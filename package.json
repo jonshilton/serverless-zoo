@@ -16,7 +16,7 @@
     "test": "npm run test:unit && npm run test:int",
     "test:watch": "npm run test:unit -- --watch",
     "stop-dynamo": "kill `ps -ax | grep Dynamo | grep -v grep | awk '{print $1}'`",
-    "prestart": "cd seed-data && node generate.js && npm run stop-dynamo",
+    "prestart": "cd seed-data && node generate.js",
     "start": "env-cmd ./config/env.local serverless offline start",
     "deploy:shadow": "env-cmd ./config/env.shadow serverless --stage=shadow deploy",
     "deploy:prod": "env-cmd ./config/env.prod serverless --stage=production deploy",

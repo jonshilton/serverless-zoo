@@ -22,6 +22,8 @@ touch config/env.local
 The following environment variables need ot be set:
 
 - CORS (string): either an endpoint or wildcard (\*) can be used
+- GRAPHQL_ENDPOINT (string): the endpoint for the graphQl server
+- DEPLOYMENT_BUCKET (string): the deployment bucket to use for serverless artifacts
 
 ### Installing
 

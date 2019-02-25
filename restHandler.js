@@ -10,8 +10,12 @@ const ops = new Operations('Animals');
  */
 module.exports.create = async event => {
   const data = JSON.parse(event.body);
-  const response = await ops.createRecord(data);
-  return responses.success(response);
+  try {
+    const response = await ops.createRecord(data);
+    return responses.success(response);
+  } catch (err) {
+    return responses.error(err);
+  }
 };
 
 /**
@@ -22,7 +26,11 @@ module.exports.create = async event => {
 module.exports.read = async event => {
   let response;
   if (event.pathParameters && event.pathParameters.id) {
-    response = await ops.getRecord({ id: event.pathParameters.id });
+    try {
+      response = await ops.getRecord({ id: event.pathParameters.id });
+    } catch (err) {
+      return responses.error(err);
+    }
   } else {
     const args = {
       limit:
@@ -34,7 +42,11 @@ module.exports.read = async event => {
           ? event.queryStringParameters.nextToken
           : null
     };
-    response = await ops.getRecords(args);
+    try {
+      response = await ops.getRecords(args);
+    } catch (err) {
+      return responses.error(err);
+    }
   }
 
   if (!response) {
@@ -55,8 +67,12 @@ module.exports.update = async event => {
     return responses.error('ID does not match the body');
   }
 
-  const response = await ops.updateRecord(data);
-  return responses.success(response);
+  try {
+    const response = await ops.updateRecord(data);
+    return responses.success(response);
+  } catch (err) {
+    return responses.error(err);
+  }
 };
 
 /**
@@ -65,6 +81,10 @@ module.exports.update = async event => {
  * @param event
  */
 module.exports.delete = async event => {
-  const response = await ops.deleteRecord({ id: event.pathParameters.id });
-  return responses.success(response);
+  try {
+    const response = await ops.deleteRecord({ id: event.pathParameters.id });
+    return responses.success(response);
+  } catch (err) {
+    return responses.error(err);
+  }
 };
