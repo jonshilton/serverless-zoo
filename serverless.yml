@@ -9,6 +9,7 @@ provider:
   region: eu-west-1
   deploymentBucket:
     name: ${env:DEPLOYMENT_BUCKET} # Specify where deployment artifacts should be uploaded.
+  versionFunctions: false
 
 plugins:
   - serverless-webpack
@@ -42,12 +43,18 @@ functions:
     description: Create a new animal
     memorySize: 512 # Memory size in MB
     timeout: 10 # Timeout in seconds
-    role: ServiceRole
+    role: ServiceRole # Name of the role this function will assume
     events:
       - http: # This creates an API Gateway HTTP endpoint which can be used to trigger this function
           path: /
           method: post
           cors: true # Turns on CORS for this endpoint
+      - s3: # This creates an event to trigger this lambda function when an object is created
+          bucket: ${env:SLS_ZOO_BUCKET}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: animals/
+            - suffix: .json
   read:
     handler: handlers/read.handler
     description: Read an animal by ID
