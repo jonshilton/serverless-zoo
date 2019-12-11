@@ -10,7 +10,7 @@
   "author": "J. Shilton <jon@opmira.co.uk>",
   "license": "UNLICENSED",
   "scripts": {
-    "postinstall": "serverless dynamodb install",
+    "postinstall": "npx serverless dynamodb install",
     "test:unit": "NODE_ENV=test jest --coverage '.+\\.test\\.js$'",
     "test:int": "env-cmd ./config/env.local serverless offline start --exec \"NODE_ENV=test jest 'tests/.+\\.int.test\\.js$'\"",
     "test": "npm run test:unit && npm run test:int",
